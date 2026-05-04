@@ -1,0 +1,68 @@
+---
+# =============================================================================
+# package_install.yml — Install and configure common packages
+# Author: Nerea Arce | github.com/arcenerea
+# =============================================================================
+
+- name: Package Installation
+  hosts: all
+  become: true
+
+  vars:
+    packages:
+      - curl
+      - git
+      - vim
+      - htop
+      - ufw
+      - unzip
+      - wget
+      - net-tools
+      - fail2ban
+      - python3-pip
+
+  tasks:
+
+    - name: Update package cache
+      apt:
+        update_cache: true
+        cache_valid_time: 3600
+
+    - name: Upgrade all packages
+      apt:
+        upgrade: dist
+        autoremove: true
+
+    - name: Install required packages
+      apt:
+        name: "{{ packages }}"
+        state: present
+
+    - name: Enable fail2ban service
+      service:
+        name: fail2ban
+        state: started
+        enabled: true
+
+    - name: Enable UFW firewall
+      ufw:
+        state: enabled
+        policy: deny
+
+    - name: Allow SSH through UFW
+      ufw:
+        rule: allow
+        port: "22"
+        proto: tcp
+
+    - name: Allow HTTP through UFW
+      ufw:
+        rule: allow
+        port: "80"
+        proto: tcp
+
+    - name: Allow HTTPS through UFW
+      ufw:
+        rule: allow
+        port: "443"
+        proto: tcp
